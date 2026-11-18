@@ -6,7 +6,21 @@
 
 ![兰洛电子宠物中文实机界面](docs/images/chinese-interface.png)
 
-**快速入口：** [使用与功能说明](使用与功能说明.md) · [Windows 烧录说明](Windows烧录说明.md) · [Windows 固件烧录包](downloads/lanluo-windows-flash.zip) · [开发说明](docs/开发说明.md)
+**快速入口：** [版本下载 Releases](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/tag/pc-v1.2.0) · [使用与功能说明](使用与功能说明.md) · [Windows 烧录说明](Windows烧录说明.md) · [开发说明](docs/开发说明.md)
+
+## 下载安装包
+
+| 下载 | 适用平台 | 用途 |
+| --- | --- | --- |
+| [兰洛桌宠 v1.2.0 Mac 版](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-Desktop-1.2.0-macOS-AppleSilicon.zip) | Apple Silicon，macOS 13+ | 解压后打开 `.app`，也可拖入“应用程序”；已内置 PC 桌宠运行环境 |
+| [兰洛桌宠 v1.2.0 Windows 版](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-Desktop-1.2.0-Windows-x64.zip) | Windows 10/11 x64 | 完整解压后运行 `Lanluo.exe`，需保留同目录资源与 DLL |
+| [ESP32 中文固件 Windows 烧录包](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-ESP32-Windows-Flash-1.0.0.zip) | Windows | 为开发板烧录中文固件；需 Python 和 esptool |
+
+前两项是原 `CustomElectronicPet` 项目的 **PC 独立桌宠 v1.2.0**，沿用原发布文件，**不包含本项目新增的 ESP32 USB 联机桥接**。要让开发板同步 Mac 画面、触摸和语音，仍请按下方“Mac 联机体验”运行本仓库服务端。
+
+Mac PC 包采用 ad-hoc 签名、未做 Apple 公证；Windows PC 包未做发布者签名，且尚未完成 Windows 实机验收。Mac PC 版的系统钥匙串保存验证也有未解决的超时记录，详见 [PC 原版使用与验证说明](docs/pc-v1.2.0/使用说明.md)。本次发布保留这些原有状态。
+
+下载后可通过 [SHA-256 校验文件](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/SHA256SUMS.txt) 核对完整性。当前仓库为私有仓库，下载需登录有访问权限的 GitHub 账号。
 
 ## 可以做什么
 
@@ -38,7 +52,7 @@ flowchart LR
 
 ### Windows 直接烧录
 
-只想把现成的中文版烧进开发板，可以使用 [Windows 固件烧录包](downloads/lanluo-windows-flash.zip)，无需安装完整 ESP-IDF 或 Mac 服务端。
+只想把现成的中文版烧进开发板，可以使用 [Windows 固件烧录包](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-ESP32-Windows-Flash-1.0.0.zip)，无需安装完整 ESP-IDF 或 Mac 服务端。仓库内也保留 [烧录包副本](downloads/lanluo-windows-flash.zip)。
 
 1. 将烧录包下载到 Windows 并完整解压。
 2. 按 [Windows 烧录说明](Windows烧录说明.md) 安装 Python 和 esptool。

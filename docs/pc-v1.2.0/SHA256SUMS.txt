@@ -1,0 +1,2 @@
+2f248ee76af2120d0cabfd24d5b701ebf437855cefca489e9af83fbf156a1d13  兰洛桌宠-1.2.0-Windows-x64.zip
+c54d00eed8f3b18d9950f064dc52d427061e0b955b05388de0375b48a2fab7de  兰洛桌宠-1.2.0-macOS-AppleSilicon.zip
