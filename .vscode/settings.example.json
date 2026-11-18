@@ -1,0 +1,7 @@
+{
+  "idf.flashType": "UART",
+  "idf.customExtraVars": { "IDF_TARGET": "esp32s3" },
+  "idf.openOcdConfigs": ["board/esp32s3-builtin.cfg"],
+  "cmake.configureOnOpen": false,
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+}

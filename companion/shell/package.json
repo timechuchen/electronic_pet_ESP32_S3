@@ -1,0 +1,9 @@
+{
+  "name": "lanluo-desktop",
+  "productName": "兰洛桌宠",
+  "version": "1.2.0",
+  "main": "main.cjs",
+  "description": "兰洛独立桌面宠物",
+  "author": "Lanluo",
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,58 @@
+{
+  "fps": 8,
+  "width": 320,
+  "height": 320,
+  "totalBytes": 3173147,
+  "clips": [
+    {
+      "name": "idle",
+      "first": 0,
+      "count": 32
+    },
+    {
+      "name": "wave",
+      "first": 32,
+      "count": 24
+    },
+    {
+      "name": "blink",
+      "first": 56,
+      "count": 4
+    },
+    {
+      "name": "wink",
+      "first": 60,
+      "count": 10
+    },
+    {
+      "name": "smile",
+      "first": 70,
+      "count": 23
+    },
+    {
+      "name": "nod",
+      "first": 93,
+      "count": 16
+    },
+    {
+      "name": "shake",
+      "first": 109,
+      "count": 18
+    },
+    {
+      "name": "dance",
+      "first": 127,
+      "count": 36
+    },
+    {
+      "name": "jump",
+      "first": 163,
+      "count": 16
+    },
+    {
+      "name": "grace",
+      "first": 179,
+      "count": 192
+    }
+  ]
+}
