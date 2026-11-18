@@ -7,9 +7,6 @@
 /sdkconfig
 /sdkconfig.old
 /artifacts/
-/companion/data/
-/companion/node_modules
-/companion/python
 /tools/font-tool/node_modules/
 *.log
 **/__pycache__/
@@ -24,10 +21,10 @@ venv/
 .module-cache/
 *.app/
 /.vscode/settings.json
-/companion/backend/data/
 *.pem
 *.key
 
 # Generated firmware and flash bundles are local build outputs.
 /firmware/
 /downloads/
+.venv/

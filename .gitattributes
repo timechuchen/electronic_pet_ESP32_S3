@@ -15,10 +15,5 @@
 *.wasm binary
 *.task binary
 *.tflite binary
-companion/backend/web/app.js linguist-generated=true -whitespace
-companion/backend/web/audio-worker.js linguist-generated=true
-companion/backend/web/tracking-worker.js linguist-generated=true
-companion/backend/web/audio/wasm/* linguist-vendored=true -whitespace
-companion/backend/web/tracking/wasm/* linguist-vendored=true -whitespace
 main/pet_font_zh_*.c linguist-generated=true -whitespace
 main/pet_assets.h linguist-generated=true

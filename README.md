@@ -10,15 +10,13 @@
 
 ## PC 客户端与下载
 
-**本仓库负责 ESP32 固件与编译烧录，不再分发 PC 安装包。** Mac、Windows 桌宠的源码、安装包和使用说明统一维护在独立 PC 项目：
+**本仓库仅维护开发板固件、离线素材和开发板工具，不包含 PC 客户端代码或安装包。** Mac、Windows 桌宠的源码、安装包和使用说明统一维护在独立 PC 项目：
 
 - **项目地址：** [electronic_pet_PC](https://github.com/timechuchen/electronic_pet_PC)
 - **安装包下载：** [PC 项目 Releases](https://github.com/timechuchen/electronic_pet_PC/releases/latest)
 - **使用说明：** [PC 项目 README](https://github.com/timechuchen/electronic_pet_PC#readme)
 
 PC 客户端 **v1.3.0 起已包含 USB 自动连接、画面同步、触摸回传和板端语音**。给开发板烧录本仓库固件后，打开 PC 客户端即可联机。Mac 已完成实机验证；Windows 已提供构建包，USB 和系统语音仍待 Windows 实机验收，具体支持范围以 PC 项目说明为准。
-
-本仓库的 `companion/` 保留为早期 Mac 联调工具，供开发和协议调试使用；日常联机请使用上述 PC 客户端。两个服务端不能同时占用开发板串口。
 
 ## 可以做什么
 
@@ -78,40 +76,6 @@ Windows 环境准备和指定 COM 端口的方法见 [Windows 烧录说明](Wind
 3. 打开客户端，等待菜单显示“开发板已连接”。可通过“查看开发板预览”和“测试开发板语音”检查联机。
 4. AI 聊天、模型导入和语音设置请查看 [PC 项目使用说明](https://github.com/timechuchen/electronic_pet_PC#readme)。
 
-### 开发调试：本仓库早期 Mac 服务端
-
-以下仅适用于保留的 `companion/` 源码工具，其依赖和配置路径与独立 PC 客户端不同。
-
-当前服务端适配 Mac Apple Silicon。需要 Python 3.11+、Node.js/npm、ffmpeg，以及 macOS 的 `Tingting` 中文声音。已有本项目环境的用户直接双击 `启动兰洛电子宠物.command` 即可；首次克隆按以下步骤准备：
-
-```bash
-git clone https://github.com/timechuchen/electronic_pet_ESP32_S3.git
-cd electronic_pet_ESP32_S3
-
-python3 -m venv companion/python
-./companion/python/bin/python -m pip install -r companion/requirements.txt
-npm --prefix companion ci
-```
-
-如果尚未安装 ffmpeg，可在已有 Homebrew 的前提下执行 `brew install ffmpeg`。当前语音桥接使用 `/opt/homebrew/bin/ffmpeg`；系统需有 `Tingting` 中文声音，可用 `say -v '?'` 检查。
-
-连接已烧录本项目固件的开发板，然后启动：
-
-```bash
-./启动兰洛电子宠物.command
-```
-
-开发板显示“已连接 · 点按聊天”后：
-
-- **⌘J** 打开聊天，在“连接设置”中填写 Key，保存后测试连接。
-- **⌘,** 打开模型、动作和预设设置。
-- 右键桌宠 → **测试开发板语音**，可以独立检查扬声器播放。
-- 右键桌宠 → **查看开发板预览**，查看发送给小屏的画面。
-
-首次使用系统音乐响应，需要安装 Xcode Command Line Tools，并运行 `./companion/python/bin/python companion/backend/native/build.py` 构建可选的 Mac 音频辅助程序。普通动画、触摸和回复朗读不需要该辅助程序。
-
-> Key、聊天记录和导入素材保存在本机 `companion/data/`，不会包含在 Git 提交中。切换电脑后，需要重新准备环境和配置 Key。
-
 ## 硬件与性能
 
 | 项目 | 当前配置或结果 |
@@ -137,49 +101,37 @@ npm --prefix companion ci
 ```text
 main/                    ESP-IDF 应用、中文界面和字体
 assets/                  内置离线动画及字体许可
-companion/               早期 Mac 联调工具（独立 PC 客户端见上方仓库）
-  backend/               PC 角色渲染、动作、素材及本地服务
-  shell/                 Electron、AI 聊天和 USB 桥接
-  serial_worker.py        串口传输与自动重连
-  tests/                 聊天、动作、素材测试
-tools/                   字体生成、动画导出、实机检查及 Windows 烧录工具
+tools/                   字体生成、动画导出、USB 实机检查及 Windows 源码烧录
 docs/                    实机截图和开发说明
 ```
 
-构建目录、下载的 SDK 组件、Node.js/Python 环境、本机配置、聊天记录、日志和原生编译缓存均不纳入版本管理。安装依赖后即可使用仓库内的源代码、前端资源和角色素材；不需要原 PC 项目的目录链接。
+固件编译只需 ESP-IDF，已生成的动画和中文字库随源码提供，不依赖 PC 项目、Node.js 或桌宠运行环境。构建目录、SDK 组件、工具虚拟环境和检查结果不纳入版本管理。
 
-## 开发与验证
+## 开发板工具
 
-修改 Mac 前端后重新打包：
+- `tools/build_fonts.cjs`：修改 `main/ui_text.h` 后重新生成中文子集字库。先执行 `npm ci --prefix tools/font-tool`；字体源来自首次 `idf.py reconfigure` 获取的 LVGL 组件。
+- `tools/export_assets.cjs`：导出固件所用的离线动画。仅重新导出时需要外部 PC 项目作为渲染器，通过 `--pc-root` 显式指定路径；固件构建不依赖它。
+- `tools/check_board.py` / `tools/board_usb.py`：独立的 USB 协议诊断、动作/CRC/JPEG 检查和屏幕截图，不需要 PC 客户端源码。
+- `tools/windows_flash.py`：在已激活的 Windows ESP-IDF 环境中从源码编译并烧录。
 
-```bash
-npm --prefix companion run build:web
-```
-
-修改 `main/ui_text.h` 中的中文文案后，先更新字库再编译固件：
-
-```bash
-npm ci --prefix tools/font-tool
-node tools/build_fonts.cjs
-idf.py build
-```
-
-字库生成使用 `managed_components/` 中的思源黑体源文件，首次运行前先通过 `idf.py reconfigure` 获取 SDK 组件。
-
-运行不依赖开发板的测试：
+在已激活的 ESP-IDF Python 环境中运行逻辑检查：
 
 ```bash
-npm --prefix companion test
-./companion/python/bin/python -B -m unittest discover -s companion/tests -p 'test_*.py'
-./companion/python/bin/python -B -m unittest discover -s tools -p 'test_windows_flash.py'
+python -B -m unittest discover -s tools -p 'test_*.py'
 ```
 
-已通过 13 项聊天服务、20 项后端和 9 项 Windows 烧录逻辑测试。实机已验证中文界面、图像传输、动作回传、暂停、离线回退、语音及 USB 拔插重连。聊天气泡与动作联动采用合成回复验证，真实 AI 对话需自行配置 Key 后测试。
+实机诊断需要 pySerial，可在独立虚拟环境中执行 `python -m pip install -r tools/requirements.txt`。先退出 PC 客户端或暂停自动连接，释放串口，再运行：
 
-离线动画导出、USB 协议、实机截图及完整测试命令见 [开发说明](docs/开发说明.md) 和 [Windows 烧录说明](Windows烧录说明.md)。
+```bash
+python tools/check_board.py --port YOUR_SERIAL_PORT --chinese
+```
 
-## 代码与素材来源
+该命令会暂时切换开发板动作、测试画面和暂停状态，并将诊断结果与截图保存到 `artifacts/`；不会烧录固件。详细步骤和 USB 协议见 [开发说明](docs/开发说明.md)。
 
-PC 功能与兰洛素材沿用原 `CustomElectronicPet` 项目，第三方代码、模型与字体保留原有授权范围；本仓库未额外授予角色素材公开再分发许可。
+## 验证范围
 
-相关许可见 [第三方组件说明](companion/backend/THIRD_PARTY_LICENSES.txt)、[跟踪组件许可](companion/backend/web/tracking/LICENSE.txt)、[音频组件许可](companion/backend/web/audio/LICENSE.txt) 和 [思源黑体许可](assets/fonts/SourceHanSansSC-LICENSE.txt)。
+开发板中文界面、离线动画、触摸、JPEG/CRC 检查、语音接收及离线回退已有实机验证。PC 自动连接、AI 对话和系统语音的测试与平台限制统一见 [PC 项目](https://github.com/timechuchen/electronic_pet_PC)。Windows 烧录工具通过逻辑检查，Windows USB 烧录仍待实机验证。
+
+## 素材与许可
+
+内置离线帧沿用原兰洛角色素材；本仓库未额外授予角色素材公开再分发许可。原始模型和 PC 渲染代码在 [PC 项目](https://github.com/timechuchen/electronic_pet_PC) 维护。中文子集字库许可见 [思源黑体许可证](assets/fonts/SourceHanSansSC-LICENSE.txt)，固件第三方组件由 ESP-IDF 组件管理器获取并保留各自许可证。

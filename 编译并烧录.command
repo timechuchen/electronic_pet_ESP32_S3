@@ -21,4 +21,4 @@ if /usr/sbin/lsof -t "$PET_PORT" >/dev/null 2>&1; then
   exit 1
 fi
 python "$IDF_PATH/tools/idf.py" -p "$PET_PORT" build flash
-echo '烧录完成。可运行「启动兰洛电子宠物.command」进入联机模式。'
+echo '烧录完成。离线可直接使用；联机请打开独立 PC 客户端：https://github.com/timechuchen/electronic_pet_PC'
