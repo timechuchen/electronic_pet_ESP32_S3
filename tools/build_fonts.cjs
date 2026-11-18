@@ -10,7 +10,7 @@ const converter = path.join(__dirname, 'font-tool/node_modules/lv_font_conv/lv_f
 const header = fs.readFileSync(path.join(root, 'main/ui_text.h'), 'utf8');
 const strings = [...header.matchAll(/"([^"\n]*)"/g)].map(match => match[1]).join('');
 const allCharacters = [...new Set(strings)].sort().join('');
-for (const [size, symbols] of [[20, allCharacters], [28, '兰洛']]) {
+for (const [size, symbols] of [[16, allCharacters], [20, allCharacters], [28, '兰洛']]) {
   const output = path.join(root, `main/pet_font_zh_${size}.c`);
   execFileSync(process.execPath, [converter, '--size', String(size), '--bpp', '4',
     '--format', 'lvgl', '--font', source, '--symbols', symbols, '--no-compress',

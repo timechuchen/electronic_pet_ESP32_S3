@@ -17,29 +17,21 @@
 #include "lvgl.h"
 #include "src/misc/cache/instance/lv_image_cache.h"
 #include "pet_assets.h"
-#include "ui_text.h"
+#include "pet_ui.h"
 
-LV_FONT_DECLARE(pet_font_zh_20);
-LV_FONT_DECLARE(pet_font_zh_28);
 
 #define SIDE 320
 #define MAX_PACKET 98304
 static const char *TAG="pet";
 extern const uint8_t assets_start[] asm("_binary_pet_frames_bin_start");
-static lv_obj_t *portrait, *status_text, *caption, *btn[3], *btn_text[3];
 static lv_image_dsc_t image_desc;
 static uint8_t *pixels;
 static jpeg_dec_handle_t decoder;
-static int clip, frame, page;
-static bool paused;
 static int64_t last_live_us;
 static uint32_t live_frames, decoded_frames, events;
 typedef struct { uint8_t *bytes; uint32_t size; bool end; } sound_packet_t;
 static QueueHandle_t sound_queue;
 static bool sound_available;
-static const char *pages[5][3]={{"wave","dance","more"},{"smile","wink","more"},{"nod","shake","more"},{"jump","grace","more"},{"blink","pause","home"}};
-static const char *page_labels[5][3]=UI_PAGE_LABELS;
-
 // Call only while holding the BSP/LVGL lock. JPEGs are strictly bounded.
 static bool decode_frame(const uint8_t *jpeg, uint32_t size)
 {
@@ -50,88 +42,32 @@ static bool decode_frame(const uint8_t *jpeg, uint32_t size)
     if(jpeg_dec_get_outbuf_len(decoder,&needed)!=JPEG_ERR_OK || needed>SIDE*SIDE*2) return false;
     if(jpeg_dec_process(decoder,&io)!=JPEG_ERR_OK) return false;
     lv_image_cache_drop(&image_desc);
-    lv_obj_invalidate(portrait);
+    pet_ui_invalidate_image();
     decoded_frames++;
     return true;
 }
 
 static bool connected(void){return last_live_us && esp_timer_get_time()-last_live_us<2500000;}
-static void refresh_button_labels(void)
+static bool render_local_frame(unsigned index)
 {
-    for(int i=0;i<3;i++)lv_label_set_text(btn_text[i],strcmp(pages[page][i],"pause")==0?(paused?UI_CONTINUE:UI_PAUSE):page_labels[page][i]);
-}
-static const char *action_label(const char *name)
-{
-    for(int p=0;p<5;p++)for(int i=0;i<3;i++)if(strcmp(pages[p][i],name)==0)return page_labels[p][i];
-    return UI_IDLE;
-}
-static void choose_action(const char *name, bool notify)
-{
-    if(strcmp(name,"more")==0 || strcmp(name,"home")==0){
-        page=strcmp(name,"home")==0?0:(page+1)%5;
-        refresh_button_labels();
-        return;
-    }
-    if(strcmp(name,"pause")==0)paused=!paused;
-    else if(strcmp(name,"reset")==0){clip=0;frame=0;paused=false;}
-    else if(strcmp(name,"chat")!=0){
-        for(int i=0;i<PET_CLIP_COUNT;i++)if(strcmp(pet_clips[i].name,name)==0){clip=i;frame=0;paused=false;break;}
-    }
-    lv_label_set_text(caption,paused?UI_REST:strcmp(name,"chat")==0?(connected()?UI_CHAT_LIVE:UI_CHAT_OFFLINE):strcmp(name,"pause")==0?UI_RESUME:action_label(name));
-    refresh_button_labels();
-    if(notify){events++;printf("PET_EVENT {\"action\":\"%s\",\"number\":%" PRIu32 "}\n",name,events);fflush(stdout);}
+    const pet_frame_t *f = &pet_frames[index];
+    return decode_frame(assets_start + f->offset, f->length);
 }
 
-static void button_event(lv_event_t *e){choose_action(pages[page][(intptr_t)lv_event_get_user_data(e)],true);}
-static void pet_touch(lv_event_t *e){choose_action(lv_event_get_code(e)==LV_EVENT_LONG_PRESSED?"reset":"smile",true);}
-static void chat_touch(lv_event_t *e){(void)e;choose_action("chat",true);}
-static void animate(lv_timer_t *timer)
+static void notify_action(const char *name)
 {
-    (void)timer;
-    bool live=connected();
-    lv_label_set_text(status_text,live?UI_LIVE:UI_OFFLINE);
-    lv_obj_set_style_text_color(status_text,lv_color_hex(live?0x79E4BD:0xAFBDC9),0);
-    if(!live && !paused){
-        const pet_clip_t *c=&pet_clips[clip];
-        const pet_frame_t *f=&pet_frames[c->first+frame];
-        decode_frame(assets_start+f->offset,f->length);
-        if(++frame>=c->count){frame=0;if(clip!=0){clip=0;lv_label_set_text(caption,UI_IDLE);}}
-    }
+    events++;
+    printf("PET_EVENT {\"action\":\"%s\",\"number\":%" PRIu32 "}\n",name,events);
+    fflush(stdout);
 }
 
-static lv_obj_t *text(lv_obj_t *parent,const char *s,const lv_font_t *font,uint32_t color)
-{
-    lv_obj_t *l=lv_label_create(parent);lv_label_set_text(l,s);
-    lv_obj_set_style_text_font(l,font,0);lv_obj_set_style_text_color(l,lv_color_hex(color),0);return l;
-}
 static void ui_init(void)
 {
-    lv_obj_t *screen=lv_screen_active();lv_obj_remove_flag(screen,LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_bg_color(screen,lv_color_black(),0);
-    lv_obj_t *name=text(screen,UI_TITLE,&pet_font_zh_28,0xF0F6F2);
-    lv_obj_set_style_text_letter_space(name,4,0);
-    lv_obj_align(name,LV_ALIGN_TOP_MID,0,27);
-    status_text=text(screen,UI_OFFLINE,&pet_font_zh_20,0xAFBDC9);
-    lv_obj_align(status_text,LV_ALIGN_TOP_MID,0,60);
-    lv_obj_set_ext_click_area(status_text,14);lv_obj_add_flag(status_text,LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(status_text,chat_touch,LV_EVENT_CLICKED,NULL);
     image_desc=(lv_image_dsc_t){.header={.magic=LV_IMAGE_HEADER_MAGIC,.cf=LV_COLOR_FORMAT_RGB565,.w=SIDE,.h=SIDE,.stride=SIDE*2},.data_size=SIDE*SIDE*2,.data=pixels};
-    portrait=lv_image_create(screen);lv_image_set_src(portrait,&image_desc);lv_obj_set_pos(portrait,89,85);
-    lv_image_set_pivot(portrait,0,0);lv_image_set_scale(portrait,230);
-    lv_obj_add_flag(portrait,LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(portrait,pet_touch,LV_EVENT_SHORT_CLICKED,NULL);
-    lv_obj_add_event_cb(portrait,pet_touch,LV_EVENT_LONG_PRESSED,NULL);
-    caption=text(screen,UI_IDLE,&pet_font_zh_20,0xAFBDC9);lv_obj_align(caption,LV_ALIGN_TOP_MID,0,344);
-    for(int i=0;i<3;i++){
-        btn[i]=lv_button_create(screen);lv_obj_set_pos(btn[i],94+i*94,374);lv_obj_set_size(btn[i],90,46);
-        lv_obj_set_style_radius(btn[i],18,0);lv_obj_set_style_bg_color(btn[i],lv_color_hex(i==0?0x79E4BD:0x20313C),0);
-        lv_obj_set_style_shadow_width(btn[i],0,0);lv_obj_set_style_pad_all(btn[i],0,0);
-        lv_obj_set_style_bg_color(btn[i],lv_color_hex(0x456F68),LV_STATE_PRESSED);
-        btn_text[i]=text(btn[i],page_labels[0][i],&pet_font_zh_20,i==0?0x08141B:0xE9F2EF);lv_obj_center(btn_text[i]);
-        lv_obj_add_event_cb(btn[i],button_event,LV_EVENT_CLICKED,(void *)(intptr_t)i);
-    }
-    decode_frame(assets_start+pet_frames[0].offset,pet_frames[0].length);
-    lv_timer_create(animate,125,NULL);
+    const pet_ui_callbacks_t callbacks = {
+        .render_frame = render_local_frame, .is_live = connected, .notify_action = notify_action
+    };
+    pet_ui_init(&image_desc, &callbacks);
 }
 
 static void sound_task(void *arg)
@@ -192,13 +128,15 @@ static void usb_task(void *arg)
         }else if(kind==4){sound_packet_t pkt={.end=true};ok=xQueueSend(sound_queue,&pkt,pdMS_TO_TICKS(1000))==pdTRUE;
         }else if(kind==3 && len<64){
             if(bsp_display_lock(1000)==ESP_OK){
+                ok=true;
                 if(strcmp((char *)payload,"status")==0){
-                    printf("PET_STATUS {\"live\":%s,\"frames\":%" PRIu32 ",\"decoded\":%" PRIu32 ",\"action\":\"%s\",\"paused\":%s,\"sound\":%s}\n",connected()?"true":"false",live_frames,decoded_frames,pet_clips[clip].name,paused?"true":"false",sound_available?"true":"false");
+                    pet_ui_state_t state=pet_ui_get_state();
+                    printf("PET_STATUS {\"live\":%s,\"frames\":%" PRIu32 ",\"decoded\":%" PRIu32 ",\"action\":\"%s\",\"paused\":%s,\"ambient\":%s,\"page\":%u,\"sound\":%s}\n",connected()?"true":"false",live_frames,decoded_frames,state.action,state.paused?"true":"false",state.ambient?"true":"false",state.page,sound_available?"true":"false");
                 }else if(strcmp((char *)payload,"snapshot")==0)snapshot();
-                else if(strcmp((char *)payload,"offline")==0){last_live_us=0;choose_action("reset",false);}
+                else if(strcmp((char *)payload,"offline")==0){last_live_us=0;pet_ui_action("reset",false);}
                 else if(strcmp((char *)payload,"stop_audio")==0){sound_packet_t old;while(xQueueReceive(sound_queue,&old,0)==pdTRUE)free(old.bytes);sound_packet_t end={.end=true};xQueueSend(sound_queue,&end,0);}
-                else choose_action((char *)payload,true);
-                bsp_display_unlock();ok=true;
+                else ok=pet_ui_action((char *)payload,true);
+                bsp_display_unlock();
             }
         }
         ack(seq,ok);
