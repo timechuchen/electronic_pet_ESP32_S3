@@ -2,34 +2,33 @@
 
 在 1.75 英寸 AMOLED 圆屏上陪伴、互动和聊天。
 
-基于 **Waveshare ESP32-S3-Touch-AMOLED-1.75C** 与 **ESP-IDF**：开发板独立播放兰洛动画、响应触摸；连接 Mac 后，同步原 PC 版的角色渲染、AI 回复和中文语音。
+基于 **Waveshare ESP32-S3-Touch-AMOLED-1.75C** 与 **ESP-IDF**：开发板独立播放兰洛动画、响应触摸；连接 PC 客户端后，同步角色画面、AI 回复和中文语音。
 
 ![兰洛电子宠物中文实机界面](docs/images/chinese-interface.png)
 
-**快速入口：** [版本下载 Releases](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/tag/pc-v1.2.0) · [使用与功能说明](使用与功能说明.md) · [Windows 烧录说明](Windows烧录说明.md) · [开发说明](docs/开发说明.md)
+**快速入口：** [PC 客户端项目](https://github.com/timechuchen/electronic_pet_PC) · [使用与功能说明](使用与功能说明.md) · [Windows 烧录说明](Windows烧录说明.md) · [开发说明](docs/开发说明.md)
 
-## 下载安装包
+## PC 客户端与下载
 
-| 下载 | 适用平台 | 用途 |
-| --- | --- | --- |
-| [兰洛桌宠 v1.2.0 Mac 版](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-Desktop-1.2.0-macOS-AppleSilicon.zip) | Apple Silicon，macOS 13+ | 解压后打开 `.app`，也可拖入“应用程序”；已内置 PC 桌宠运行环境 |
-| [兰洛桌宠 v1.2.0 Windows 版](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-Desktop-1.2.0-Windows-x64.zip) | Windows 10/11 x64 | 完整解压后运行 `Lanluo.exe`，需保留同目录资源与 DLL |
+**本仓库负责 ESP32 固件与编译烧录，不再分发 PC 安装包。** Mac、Windows 桌宠的源码、安装包和使用说明统一维护在独立 PC 项目：
 
-以上两项是原 `CustomElectronicPet` 项目的 **PC 独立桌宠 v1.2.0**，沿用原发布文件，**不包含本项目新增的 ESP32 USB 联机桥接**。要让开发板同步 Mac 画面、触摸和语音，仍请按下方“Mac 联机体验”运行本仓库服务端。
+- **项目地址：** [electronic_pet_PC](https://github.com/timechuchen/electronic_pet_PC)
+- **安装包下载：** [PC 项目 Releases](https://github.com/timechuchen/electronic_pet_PC/releases/latest)
+- **使用说明：** [PC 项目 README](https://github.com/timechuchen/electronic_pet_PC#readme)
 
-Mac PC 包采用 ad-hoc 签名、未做 Apple 公证；Windows PC 包未做发布者签名，且尚未完成 Windows 实机验收。Mac PC 版的系统钥匙串保存验证也有未解决的超时记录，详见 [PC 原版使用与验证说明](docs/pc-v1.2.0/使用说明.md)。本次发布保留这些原有状态。
+PC 客户端 **v1.3.0 起已包含 USB 自动连接、画面同步、触摸回传和板端语音**。给开发板烧录本仓库固件后，打开 PC 客户端即可联机。Mac 已完成实机验证；Windows 已提供构建包，USB 和系统语音仍待 Windows 实机验收，具体支持范围以 PC 项目说明为准。
 
-下载后可通过 [SHA-256 校验文件](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/SHA256SUMS.txt) 核对完整性。当前仓库为私有仓库，下载需登录有访问权限的 GitHub 账号。
+本仓库的 `companion/` 保留为早期 Mac 联调工具，供开发和协议调试使用；日常联机请使用上述 PC 客户端。两个服务端不能同时占用开发板串口。
 
 ## 可以做什么
 
-| 功能 | 离线陪伴 | 连接 Mac |
+| 功能 | 离线陪伴 | 连接 PC 客户端（Mac 已验证） |
 | --- | --- | --- |
 | 中文圆屏界面、触摸按钮 | ✓ | ✓ |
-| 待机、挥手、点头、跳舞等 9 组动作与表情 | 内置帧动画 | Mac 实时渲染 |
-| AI 文字对话、历史、情绪动作 | — | Mac 输入，板上显示气泡与动作 |
-| 中文回复朗读与说话口型 | — | Mac 生成语音，板载扬声器播放 |
-| 更换 VRM 模型、导入 FBX 和自定义动作 | 需重新制作离线素材 | 在 Mac 设置中操作 |
+| 待机、挥手、点头、跳舞等 9 组动作与表情 | 内置帧动画 | PC 实时渲染 |
+| AI 文字对话、历史、情绪动作 | — | PC 输入，板上显示气泡与动作 |
+| 中文回复朗读与说话口型 | — | PC 生成语音，板载扬声器播放 |
+| 更换 VRM 模型、导入 FBX 和自定义动作 | 需重新制作离线素材 | 在 PC 客户端设置中操作 |
 | 摄像头跟随、系统音乐响应 | — | 保留 PC 版入口，板端联机效果待验证 |
 
 点一下角色会微笑，长按恢复默认动作；底部“更多”可切换五页按钮。约 2.5 秒收不到联机画面后自动切回离线模式，暂停状态可通过“继续”或长按角色解除。
@@ -38,14 +37,14 @@ Mac PC 包采用 ad-hoc 签名、未做 Apple 公证；Windows PC 包未做发�
 
 ```mermaid
 flowchart LR
-    User[Mac 文字输入] --> Mac[Mac 服务端]
-    Mac <-->|AI 请求与回复| AI[DeepSeek API]
-    Mac -->|USB 画面与语音| Board[ESP32-S3 圆屏与扬声器]
-    Board -->|USB 触摸动作| Mac
+    User[PC 文字输入] --> PC[PC 客户端]
+    PC <-->|AI 请求与回复| AI[DeepSeek API]
+    PC -->|USB 画面与语音| Board[ESP32-S3 圆屏与扬声器]
+    Board -->|USB 触摸动作| PC
     Local[Flash 内置动画] -->|离线模式| Board
 ```
 
-开发板不直接运行 VRM 或大语言模型。AI 聊天需要 Mac 联网并配置自己的 API Key；USB 联机动画和本地语音测试不需要 Key，也不用给开发板配置 Wi-Fi。
+开发板不直接运行 VRM 或大语言模型。AI 聊天需要 PC 联网并配置自己的 API Key；USB 联机动画和本地语音测试不需要 Key，也不用给开发板配置 Wi-Fi。
 
 ## 快速开始
 
@@ -72,7 +71,16 @@ idf.py -p YOUR_SERIAL_PORT flash
 
 Windows 环境准备和指定 COM 端口的方法见 [Windows 烧录说明](Windows烧录说明.md)。Windows 脚本已通过逻辑测试，**尚未进行 Windows 实机烧录验证**。
 
-### Mac 联机体验
+### 使用 PC 客户端联机
+
+1. 从 [PC 项目 Releases](https://github.com/timechuchen/electronic_pet_PC/releases/latest) 下载对应系统的应用，并按该项目说明安装或完整解压。
+2. 退出旧桌宠、旧服务端及串口监视器，使用 USB 数据线连接已烧录兰洛固件的开发板。
+3. 打开客户端，等待菜单显示“开发板已连接”。可通过“查看开发板预览”和“测试开发板语音”检查联机。
+4. AI 聊天、模型导入和语音设置请查看 [PC 项目使用说明](https://github.com/timechuchen/electronic_pet_PC#readme)。
+
+### 开发调试：本仓库早期 Mac 服务端
+
+以下仅适用于保留的 `companion/` 源码工具，其依赖和配置路径与独立 PC 客户端不同。
 
 当前服务端适配 Mac Apple Silicon。需要 Python 3.11+、Node.js/npm、ffmpeg，以及 macOS 的 `Tingting` 中文声音。已有本项目环境的用户直接双击 `启动兰洛电子宠物.command` 即可；首次克隆按以下步骤准备：
 
@@ -118,10 +126,10 @@ npm --prefix companion ci
 
 ## 当前限制
 
-- AI 对话、实时 VRM 渲染和回复朗读依赖 Mac；当前没有独立联网 AI 模式。
+- AI 对话、实时 VRM 渲染和回复朗读依赖 PC 客户端；当前没有独立联网 AI 模式。
 - 没有接入板载麦克风识别、语音唤醒、Wi-Fi 联机、OTA 或电池电量显示。
-- 小屏长回复气泡显示空间有限，完整内容请在 Mac 聊天窗口查看。
-- Mac 更换模型不会更新离线固件；离线素材需重新导出并烧录。
+- 小屏长回复气泡显示空间有限，完整内容请在 PC 客户端聊天窗口查看。
+- PC 客户端更换模型不会更新离线固件；离线素材需重新导出并烧录。
 - 曾出现 USB 无响应而离线动画仍运行的情况，拔插后恢复，触发原因尚未确定。遇到时先拔插 USB，必要时按 RESET。
 
 ## 项目结构
@@ -129,7 +137,7 @@ npm --prefix companion ci
 ```text
 main/                    ESP-IDF 应用、中文界面和字体
 assets/                  内置离线动画及字体许可
-companion/
+companion/               早期 Mac 联调工具（独立 PC 客户端见上方仓库）
   backend/               PC 角色渲染、动作、素材及本地服务
   shell/                 Electron、AI 聊天和 USB 桥接
   serial_worker.py        串口传输与自动重连
