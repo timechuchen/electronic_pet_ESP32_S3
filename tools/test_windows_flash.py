@@ -2,7 +2,6 @@ import contextlib
 import io
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 from types import SimpleNamespace
@@ -18,7 +17,15 @@ class FlashTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.bundle = self.root / "firmware"
-        shutil.copytree(flash.ROOT / "firmware", self.bundle)
+        self.bundle.mkdir()
+        files = []
+        for offset, name in flash.LAYOUT.items():
+            image = self.bundle / name
+            image.write_bytes(b"synthetic test firmware: " + name.encode())
+            files.append({"offset": hex(offset), "file": name, "sha256": flash.sha256(image)})
+        (self.bundle / "manifest.json").write_text(json.dumps({
+            "schema": 1, "project": "lanluo_pet", "chip": "esp32s3", "files": files,
+        }))
 
     def test_bundle_and_offsets(self):
         plan = flash.validate_firmware(self.bundle)

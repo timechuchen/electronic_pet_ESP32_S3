@@ -14,9 +14,8 @@
 | --- | --- | --- |
 | [兰洛桌宠 v1.2.0 Mac 版](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-Desktop-1.2.0-macOS-AppleSilicon.zip) | Apple Silicon，macOS 13+ | 解压后打开 `.app`，也可拖入“应用程序”；已内置 PC 桌宠运行环境 |
 | [兰洛桌宠 v1.2.0 Windows 版](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-Desktop-1.2.0-Windows-x64.zip) | Windows 10/11 x64 | 完整解压后运行 `Lanluo.exe`，需保留同目录资源与 DLL |
-| [ESP32 中文固件 Windows 烧录包](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-ESP32-Windows-Flash-1.0.0.zip) | Windows | 为开发板烧录中文固件；需 Python 和 esptool |
 
-前两项是原 `CustomElectronicPet` 项目的 **PC 独立桌宠 v1.2.0**，沿用原发布文件，**不包含本项目新增的 ESP32 USB 联机桥接**。要让开发板同步 Mac 画面、触摸和语音，仍请按下方“Mac 联机体验”运行本仓库服务端。
+以上两项是原 `CustomElectronicPet` 项目的 **PC 独立桌宠 v1.2.0**，沿用原发布文件，**不包含本项目新增的 ESP32 USB 联机桥接**。要让开发板同步 Mac 画面、触摸和语音，仍请按下方“Mac 联机体验”运行本仓库服务端。
 
 Mac PC 包采用 ad-hoc 签名、未做 Apple 公证；Windows PC 包未做发布者签名，且尚未完成 Windows 实机验收。Mac PC 版的系统钥匙串保存验证也有未解决的超时记录，详见 [PC 原版使用与验证说明](docs/pc-v1.2.0/使用说明.md)。本次发布保留这些原有状态。
 
@@ -50,17 +49,28 @@ flowchart LR
 
 ## 快速开始
 
-### Windows 直接烧录
+### 先从源码编译并烧录
 
-只想把现成的中文版烧进开发板，可以使用 [Windows 固件烧录包](https://github.com/timechuchen/electronic_pet_ESP32_S3/releases/download/pc-v1.2.0/Lanluo-ESP32-Windows-Flash-1.0.0.zip)，无需安装完整 ESP-IDF 或 Mac 服务端。仓库内也保留 [烧录包副本](downloads/lanluo-windows-flash.zip)。
+**暂不提供预编译固件或烧录包。** 请克隆本仓库完整源码，安装并激活 **ESP-IDF v6.1.1**，再编译烧录。PC 桌宠下载包不能用于给开发板烧录。
 
-1. 将烧录包下载到 Windows 并完整解压。
-2. 按 [Windows 烧录说明](Windows烧录说明.md) 安装 Python 和 esptool。
-3. 用 USB 数据线连接开发板，关闭占用串口的程序。
-4. 双击 `Windows烧录.bat`，等待自动识别或选择 COM 串口。
-5. 烧录完成后，设备复位并显示中文界面。
+```bash
+git clone https://github.com/timechuchen/electronic_pet_ESP32_S3.git
+cd electronic_pet_ESP32_S3
+idf.py build
+idf.py -p YOUR_SERIAL_PORT flash
+```
 
-烧录包包含固件 SHA-256 校验。Windows 脚本已通过跨平台逻辑测试和解压预演，**尚未进行 Windows 实机烧录验证**。此包不包含 Windows AI 联机服务端。
+将 `YOUR_SERIAL_PORT` 替换为实际串口，例如 Mac 的 `/dev/cu.usbmodem2101` 或 Windows 的 `COM5`。烧录前退出服务端并关闭串口监视器。
+
+也可以在已激活 ESP-IDF 的环境中使用项目脚本：
+
+| 平台 | 入口 | 作用 |
+| --- | --- | --- |
+| Mac | `编译并烧录.command` | 编译并自动寻找串口；也兼容本机 EIM v6.1.1 激活脚本 |
+| Windows | `Windows编译并烧录.bat` | 编译后烧录，使用独立 Windows 构建目录 |
+| Windows | `Windows烧录.bat` | 同样先编译源码，再烧录 |
+
+Windows 环境准备和指定 COM 端口的方法见 [Windows 烧录说明](Windows烧录说明.md)。Windows 脚本已通过逻辑测试，**尚未进行 Windows 实机烧录验证**。
 
 ### Mac 联机体验
 
@@ -92,26 +102,7 @@ npm --prefix companion ci
 
 首次使用系统音乐响应，需要安装 Xcode Command Line Tools，并运行 `./companion/python/bin/python companion/backend/native/build.py` 构建可选的 Mac 音频辅助程序。普通动画、触摸和回复朗读不需要该辅助程序。
 
-> Key、聊天记录和导入素材保存在本机 `companion/data/`，不会包含在 Git 提交或 Windows 烧录包中。切换电脑后，需要重新准备环境和配置 Key。
-
-### 从源码编译固件
-
-固件已在 **ESP-IDF v6.1.1** 上验证，项目目标为 `esp32s3`。先在本机安装并激活 ESP-IDF 环境，再从仓库根目录执行：
-
-```bash
-idf.py build
-idf.py -p YOUR_SERIAL_PORT flash
-```
-
-将 `YOUR_SERIAL_PORT` 替换为实际串口，例如 Mac 的 `/dev/cu.usbmodem2101` 或 Windows 的 `COM5`。烧录前退出服务端并关闭串口监视器。
-
-也可以使用项目脚本：
-
-| 平台 | 入口 | 作用 |
-| --- | --- | --- |
-| Mac | `编译并烧录.command` | 在已激活的环境中编译并自动寻找串口；也兼容本机 EIM v6.1.1 激活脚本 |
-| Windows | `Windows烧录.bat` | 烧录 `firmware/` 中的现成固件 |
-| Windows | `Windows编译并烧录.bat` | 在已激活的 ESP-IDF 环境中编译后烧录，使用独立 Windows 构建目录 |
+> Key、聊天记录和导入素材保存在本机 `companion/data/`，不会包含在 Git 提交中。切换电脑后，需要重新准备环境和配置 Key。
 
 ## 硬件与性能
 
@@ -138,7 +129,6 @@ idf.py -p YOUR_SERIAL_PORT flash
 ```text
 main/                    ESP-IDF 应用、中文界面和字体
 assets/                  内置离线动画及字体许可
-firmware/                已编译的中文固件与校验清单
 companion/
   backend/               PC 角色渲染、动作、素材及本地服务
   shell/                 Electron、AI 聊天和 USB 桥接
@@ -146,10 +136,9 @@ companion/
   tests/                 聊天、动作、素材测试
 tools/                   字体生成、动画导出、实机检查及 Windows 烧录工具
 docs/                    实机截图和开发说明
-downloads/               可直接复制到 Windows 的烧录包
 ```
 
-构建目录、下载的 SDK 组件、Node.js/Python 环境、本机配置、聊天记录、日志和原生编译缓存均不纳入版本管理。安装依赖后即可使用仓库内的源代码、前端资源、角色素材和固件；不需要原 PC 项目的目录链接。
+构建目录、下载的 SDK 组件、Node.js/Python 环境、本机配置、聊天记录、日志和原生编译缓存均不纳入版本管理。安装依赖后即可使用仓库内的源代码、前端资源和角色素材；不需要原 PC 项目的目录链接。
 
 ## 开发与验证
 
@@ -179,7 +168,7 @@ npm --prefix companion test
 
 已通过 13 项聊天服务、20 项后端和 9 项 Windows 烧录逻辑测试。实机已验证中文界面、图像传输、动作回传、暂停、离线回退、语音及 USB 拔插重连。聊天气泡与动作联动采用合成回复验证，真实 AI 对话需自行配置 Key 后测试。
 
-离线动画导出、USB 协议、实机截图、固件重新打包及完整测试命令见 [开发说明](docs/开发说明.md) 和 [Windows 烧录说明](Windows烧录说明.md)。
+离线动画导出、USB 协议、实机截图及完整测试命令见 [开发说明](docs/开发说明.md) 和 [Windows 烧录说明](Windows烧录说明.md)。
 
 ## 代码与素材来源
 

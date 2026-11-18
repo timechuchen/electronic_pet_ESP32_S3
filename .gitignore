@@ -27,3 +27,7 @@ venv/
 /companion/backend/data/
 *.pem
 *.key
+
+# Generated firmware and flash bundles are local build outputs.
+/firmware/
+/downloads/

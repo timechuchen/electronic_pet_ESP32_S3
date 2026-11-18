@@ -15,12 +15,12 @@ set "PET_RESULT=1"
 goto finish
 
 :use_python
-python "%~dp0tools\windows_flash.py" %*
+python "%~dp0tools\windows_flash.py" --build %*
 set "PET_RESULT=%errorlevel%"
 goto finish
 
 :use_launcher
-py -3 "%~dp0tools\windows_flash.py" %*
+py -3 "%~dp0tools\windows_flash.py" --build %*
 set "PET_RESULT=%errorlevel%"
 
 :finish
